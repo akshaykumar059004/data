@@ -1,12 +1,12 @@
-import { Text, View, Button, TextInput, Alert, Platform } from "react-native";
+import { Text, View, Button, TextInput } from "react-native";
 import { useState } from "react";
-import XLSX from "xlsx";
-import * as FileSystem from "expo-file-system";
-import * as Sharing from "expo-sharing"; // Make sure it's imported!
+import { useRouter } from "expo-router";
+import { useData } from "../context/DataContext"; // Import context
 
 export default function Index() {
-  const [inputs, setInputs] = useState(["", "", "", ""]); // Array for 4 inputs
-  const [list, setList] = useState([]); // Stores list of added items
+  const router = useRouter();
+  const { list, setList } = useData(); // Use global state
+  const [inputs, setInputs] = useState(["", "", "", ""]);
 
   function handleInputChange(text, index) {
     const updatedInputs = [...inputs];
@@ -15,76 +15,40 @@ export default function Index() {
   }
 
   function addGoalHandler() {
-    const nonEmptyInputs = inputs.filter((text) => text.trim() !== "");
-    if (nonEmptyInputs.length > 0) {
-      setList((currentList) => [...currentList, { id: Date.now().toString(), values: [...inputs] }]);
+    if (inputs.some((text) => text.trim() !== "")) {
+      setList((currentList) => [
+        ...currentList,
+        { id: Date.now().toString(), values: [...inputs] },
+      ]);
       setInputs(["", "", "", ""]);
     }
   }
 
-  async function downloadExcel() {
-    if (list.length === 0) {
-      Alert.alert("No Data", "There is no data to export.");
-      return;
-    }
-
-    const dataForExcel = list.map((item) => ({
-      Name: item.values[0] || "" ,
-      Age : item.values[1] || "",
-      Income: item.values[2] || "",
-      Adress: item.values[3] || "",
-    }));
-
-    const ws = XLSX.utils.json_to_sheet(dataForExcel);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-
-    const excelFile = XLSX.write(wb, { type: "base64" });
-
-    // Use documentDirectory instead of cacheDirectory
-    const fileUri = FileSystem.documentDirectory + "data.xlsx";
-
-    try {
-      await FileSystem.writeAsStringAsync(fileUri, excelFile, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
-
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(fileUri);
-      } else {
-        Alert.alert("Error", "Sharing is not available on this device.");
-      }
-    } catch (error) {
-      Alert.alert("Error", "Failed to save file: " + error.message);
-    }
-  }
-  const placeholders = ["Enter Name", "Enter Age", "Enter income", "Enter Address"];
   return (
-    <View style={{ alignItems: "center", backgroundColor: "skyblue", height: 900 }}>
-      <View style={{ flexDirection: "column", justifyContent: "space-between" }}>
-      
-{inputs.map((text, index) => (
-  <TextInput
-    key={index}
-    onChangeText={(value) => handleInputChange(value, index)}
-    value={text}
-    placeholder={placeholders[index]} // Dynamically set placeholder text
-    style={{ borderWidth: 2, margin: 10, width: 250, padding: 5 }}
-  />
-))}
-        <Text style={{ margin: 5 }}></Text>
-        <Button onPress={addGoalHandler} title="Add list" />
-        <Text style={{ margin: 5 }}></Text>
-        <Button onPress={downloadExcel} title="Download as Excel" color="green" />
-      </View>
-
-      {list.map((item) => (
-        <View key={item.id} style={{ marginTop: 10, alignItems: "center" }}>
-          {item.values.map((value, idx) => (
-            <Text key={idx}>{value}</Text>
-          ))}
-        </View>
+    <View style={{ alignItems: "center", height: "100%", padding: 20 }}>
+      <Text style={{ fontSize: 24, fontWeight: "bold", marginBottom: 20 }}>
+        Data Entry
+      </Text>
+      {["Enter Name", "Enter Age", "Enter Income", "Enter Address"].map((placeholder, index) => (
+        <TextInput
+          key={index}
+          onChangeText={(value) => handleInputChange(value, index)}
+          value={inputs[index]}
+          placeholder={placeholder}
+          style={{
+            borderWidth: 2,
+            margin: 10,
+            width: 250,
+            padding: 8,
+            borderRadius: 5,
+          }}
+        />
       ))}
+      <View style={{ margin: 30, width: 200, height: 90 }}>
+        <Button onPress={addGoalHandler} title="Add List" />
+        <View style={{ marginVertical: 10 }} />
+        <Button onPress={() => router.push("/details")} title="View Data" color="blue" />
+      </View>
     </View>
   );
 }
