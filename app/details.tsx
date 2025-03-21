@@ -1,13 +1,50 @@
 import React from "react";
-import { View, Text, StyleSheet, FlatList, Button, Alert } from "react-native";
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Button, Alert } from "react-native";
+import { useData } from "../context/DataContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import XLSX from "xlsx";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
-import { useData } from "../context/DataContext"; // Import context
 
 export default function Details() {
-  const { list } = useData(); // Get global state
+  const { list, setList } = useData();
 
+  // 🛠 Function to delete an item
+  const deleteItem = async (id) => {
+    const updatedList = list.filter((item) => item.id !== id);
+    setList(updatedList);
+
+    try {
+      await AsyncStorage.setItem("savedList", JSON.stringify(updatedList));
+    } catch (error) {
+      console.error("Failed to delete item:", error);
+    }
+  };
+
+  // 🛠 Function to clear all data with No Data Alert
+  const clearAllData = async () => {
+    if (list.length === 0) {
+      Alert.alert("No Data", "No data to clear!");
+      return;
+    }
+
+    Alert.alert("Confirm", "Are you sure you want to clear all data?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "OK",
+        onPress: async () => {
+          setList([]);
+          try {
+            await AsyncStorage.removeItem("savedList");
+          } catch (error) {
+            console.error("Failed to clear data:", error);
+          }
+        },
+      },
+    ]);
+  };
+
+  // 📥 Function to Download as Excel
   async function downloadExcel() {
     if (list.length === 0) {
       Alert.alert("No Data", "There is no data to export.");
@@ -48,35 +85,42 @@ export default function Details() {
       <Text style={styles.title}>Stored Data</Text>
 
       {/* Table Header */}
-      <View style={styles.tableHeader}>
-        <Text style={styles.headerText}>Name</Text>
-        <Text style={styles.headerText}>Age</Text>
-        <Text style={styles.headerText}>Income</Text>
-        <Text style={styles.headerText}>Address</Text>
-      </View>
-
-      {/* Data Rows */}
-      {list.length === 0 ? (
-        <Text style={styles.noDataText}>No data available</Text>
-      ) : (
-        <FlatList
-          data={list}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <View style={styles.tableRow}>
-              {item.values.map((value, index) => (
-                <Text key={index} style={styles.cell}>
-                  {value}
-                </Text>
-              ))}
-            </View>
-          )}
-        />
+      {list.length > 0 && (
+        <View style={styles.tableHeader}>
+          <Text style={styles.headerText}>Name</Text>
+          <Text style={styles.headerText}>Age</Text>
+          <Text style={styles.headerText}>Income</Text>
+          <Text style={styles.headerText}>Address</Text>
+          <Text style={styles.headerText}>Remove</Text>
+        </View>
       )}
 
-      {/* Download Button at the Bottom */}
-      <View style={styles.buttonContainer}>
-        <Button onPress={downloadExcel} title="Download as Excel" color="green" />
+      {/* Data List */}
+      <FlatList
+        data={list}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <View style={styles.tableRow}>
+            {item.values.map((value, index) => (
+              <Text key={index} style={styles.cell}>
+                {value}
+              </Text>
+            ))}
+
+            {/* 🗑️ Delete Button */}
+            <TouchableOpacity onPress={() => deleteItem(item.id)} style={styles.deleteButton}>
+              <Text style={styles.deleteButtonText}>🗑️ Delete</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+        ListEmptyComponent={<Text style={styles.noDataText}>No data available</Text>}
+      />
+
+      {/* 📌 Buttons Always at Bottom */}
+      <View style={styles.bottomButtons}>
+        <Button title="Clear All Data" color="grey" onPress={clearAllData} />
+        <View style={{ marginVertical: 10 }} />
+        <Button title="Download as Excel" color="green" onPress={downloadExcel} />
       </View>
     </View>
   );
@@ -110,6 +154,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: "#ccc",
+    alignItems: "center",
   },
   cell: {
     flex: 1,
@@ -121,8 +166,23 @@ const styles = StyleSheet.create({
     marginTop: 20,
     color: "gray",
   },
-  buttonContainer: {
-    marginTop: 20,
+  deleteButton: {
+    flex: 0.8,
     alignItems: "center",
+    justifyContent: "center",
+    padding: 5,
+    backgroundColor: "#FF5B61",
+    borderRadius: 5,
+  },
+  deleteButtonText: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  bottomButtons: {
+    marginTop: "auto", // 🔥 This pushes the buttons to the bottom
+    paddingBottom: 20,
   },
 });
+
+export default Details;
