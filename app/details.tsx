@@ -9,7 +9,6 @@ import * as Sharing from "expo-sharing";
 export default function Details() {
   const { list, setList } = useData();
 
-  // 🛠 Function to delete an item
   const deleteItem = async (id) => {
     const updatedList = list.filter((item) => item.id !== id);
     setList(updatedList);
@@ -21,7 +20,6 @@ export default function Details() {
     }
   };
 
-  // 🛠 Function to clear all data with No Data Alert
   const clearAllData = async () => {
     if (list.length === 0) {
       Alert.alert("No Data", "No data to clear!");
@@ -43,8 +41,6 @@ export default function Details() {
       },
     ]);
   };
-
-  // 📥 Function to Download as Excel
   async function downloadExcel() {
     if (list.length === 0) {
       Alert.alert("No Data", "There is no data to export.");
@@ -84,7 +80,6 @@ export default function Details() {
     <View style={styles.container}>
       <Text style={styles.title}>Stored Data</Text>
 
-      {/* Table Header */}
       {list.length > 0 && (
         <View style={styles.tableHeader}>
           <Text style={styles.headerText}>Name</Text>
@@ -95,7 +90,6 @@ export default function Details() {
         </View>
       )}
 
-      {/* Data List */}
       <FlatList
         data={list}
         keyExtractor={(item) => item.id}
@@ -107,7 +101,6 @@ export default function Details() {
               </Text>
             ))}
 
-            {/* 🗑️ Delete Button */}
             <TouchableOpacity onPress={() => deleteItem(item.id)} style={styles.deleteButton}>
               <Text style={styles.deleteButtonText}>🗑️ Delete</Text>
             </TouchableOpacity>
@@ -116,7 +109,6 @@ export default function Details() {
         ListEmptyComponent={<Text style={styles.noDataText}>No data available</Text>}
       />
 
-      {/* 📌 Buttons Always at Bottom */}
       <View style={styles.bottomButtons}>
         <Button title="Clear All Data" color="grey" onPress={clearAllData} />
         <View style={{ marginVertical: 10 }} />
@@ -180,7 +172,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   bottomButtons: {
-    marginTop: "auto", // 🔥 This pushes the buttons to the bottom
+    marginTop: "auto", 
     paddingBottom: 20,
   },
 });
