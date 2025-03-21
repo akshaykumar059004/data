@@ -1,11 +1,11 @@
 import { Text, View, Button, TextInput } from "react-native";
 import { useState } from "react";
 import { useRouter } from "expo-router";
-import { useData } from "../context/DataContext"; // Import context
+import { useData } from "../context/DataContext"; 
 
 export default function Index() {
   const router = useRouter();
-  const { list, setList } = useData(); // Use global state
+  const { list, setList } = useData();
   const [inputs, setInputs] = useState(["", "", "", ""]);
 
   function handleInputChange(text, index) {
