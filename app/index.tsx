@@ -16,10 +16,7 @@ export default function Index() {
 
   function addGoalHandler() {
     if (inputs.some((text) => text.trim() !== "")) {
-      setList((currentList) => [
-        ...currentList,
-        { id: Date.now().toString(), values: [...inputs] },
-      ]);
+      setList((currentList) => [...currentList,{ id: Date.now().toString(), values: [...inputs] },]);
       setInputs(["", "", "", ""]);
     }
   }
