@@ -8,7 +8,7 @@ export default function Index() {
   const { list, setList } = useData();
   const [inputs, setInputs] = useState(["", "", "", ""]);
 
-  function handleInputChange(text : any, index : any) {
+  function handleInputChange(text, index) {
     const updatedInputs = [...inputs];
     updatedInputs[index] = text;
     setInputs(updatedInputs);
@@ -29,9 +29,10 @@ export default function Index() {
       {["Enter Name", "Enter Age", "Enter Income", "Enter Address"].map((placeholder, index) => (
         <TextInput
           key={index}
-          onChangeText={(value) => handleInputChange(value , index)}
+          onChangeText={(value) => handleInputChange(value, index)}
           value={inputs[index]}
           placeholder={placeholder}
+          keyboardType={index === 1 || index === 2 ? "numeric" : "default"} 
           style={{
             borderWidth: 2,
             margin: 10,
