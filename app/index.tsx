@@ -8,7 +8,7 @@ export default function Index() {
   const { list, setList } = useData();
   const [inputs, setInputs] = useState(["", "", "", ""]);
 
-  function handleInputChange(text, index) {
+  function handleInputChange(text : any, index : any) {
     const updatedInputs = [...inputs];
     updatedInputs[index] = text;
     setInputs(updatedInputs);
@@ -29,7 +29,7 @@ export default function Index() {
       {["Enter Name", "Enter Age", "Enter Income", "Enter Address"].map((placeholder, index) => (
         <TextInput
           key={index}
-          onChangeText={(value) => handleInputChange(value, index)}
+          onChangeText={(value) => handleInputChange(value , index)}
           value={inputs[index]}
           placeholder={placeholder}
           style={{
@@ -44,7 +44,7 @@ export default function Index() {
       <View style={{ margin: 30, width: 200, height: 90 }}>
         <Button onPress={addGoalHandler} title="Add List" />
         <View style={{ marginVertical: 10 }} />
-        <Button onPress={() => router.push("/details")} title="View Data" color="blue" />
+        <Button onPress={() => router.push("/details")} title="View Data" color="blue"  />
       </View>
     </View>
   );

@@ -1,5 +1,5 @@
-import React from "react";
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Button, Alert } from "react-native";
+import React, { useState } from "react";
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Button, Alert, TextInput, Modal } from "react-native";
 import { useData } from "../context/DataContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import XLSX from "xlsx";
@@ -8,11 +8,13 @@ import * as Sharing from "expo-sharing";
 
 export default function Details() {
   const { list, setList } = useData();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [editedValues, setEditedValues] = useState([]);
 
   const deleteItem = async (id) => {
     const updatedList = list.filter((item) => item.id !== id);
     setList(updatedList);
-
     try {
       await AsyncStorage.setItem("savedList", JSON.stringify(updatedList));
     } catch (error) {
@@ -41,6 +43,26 @@ export default function Details() {
       },
     ]);
   };
+
+  const editItem = (item) => {
+    setSelectedItem(item);
+    setEditedValues([...item.values]);
+    setModalVisible(true);
+  };
+
+  const saveEdit = async () => {
+    const updatedList = list.map((item) =>
+      item.id === selectedItem.id ? { ...item, values: editedValues } : item
+    );
+    setList(updatedList);
+    setModalVisible(false);
+    try {
+      await AsyncStorage.setItem("savedList", JSON.stringify(updatedList));
+    } catch (error) {
+      console.error("Failed to update item:", error);
+    }
+  };
+
   async function downloadExcel() {
     if (list.length === 0) {
       Alert.alert("No Data", "There is no data to export.");
@@ -86,7 +108,7 @@ export default function Details() {
           <Text style={styles.headerText}>Age</Text>
           <Text style={styles.headerText}>Income</Text>
           <Text style={styles.headerText}>Address</Text>
-          <Text style={styles.headerText}>Remove</Text>
+          <Text style={styles.headerText}>Actions</Text>
         </View>
       )}
 
@@ -96,14 +118,16 @@ export default function Details() {
         renderItem={({ item }) => (
           <View style={styles.tableRow}>
             {item.values.map((value, index) => (
-              <Text key={index} style={styles.cell}>
-                {value}
-              </Text>
+              <Text key={index} style={styles.cell}>{value}</Text>
             ))}
-
-            <TouchableOpacity onPress={() => deleteItem(item.id)} style={styles.deleteButton}>
-              <Text style={styles.deleteButtonText}>🗑️ Delete</Text>
-            </TouchableOpacity>
+            <View style={styles.actionButtons}>
+              <TouchableOpacity onPress={() => editItem(item)} style={styles.editButton}>
+                <Text style={styles.editButtonText}>✏️ Edit</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => deleteItem(item.id)} style={styles.deleteButton}>
+                <Text style={styles.deleteButtonText}>🗑️ Delete</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         )}
         ListEmptyComponent={<Text style={styles.noDataText}>No data available</Text>}
@@ -114,6 +138,30 @@ export default function Details() {
         <View style={{ marginVertical: 10 }} />
         <Button title="Download as Excel" color="green" onPress={downloadExcel} />
       </View>
+
+      <Modal visible={modalVisible} animationType="slide" transparent>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Edit Data</Text>
+            {editedValues.map((value, index) => (
+              <TextInput
+                key={index}
+                style={styles.input}
+                value={editedValues[index]}
+                onChangeText={(text) => {
+                  const newValues = [...editedValues];
+                  newValues[index] = text;
+                  setEditedValues(newValues);
+                }}
+              />
+            ))}
+            <Text></Text>
+            <Button title="Save" onPress={saveEdit} />
+            <Text></Text>
+            <Button title="Cancel" color="red" onPress={() => setModalVisible(false)} />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -152,29 +200,53 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: "center",
   },
-  noDataText: {
-    textAlign: "center",
-    fontSize: 18,
-    marginTop: 20,
-    color: "gray",
+  buttonContainer: {
+    flexDirection: "column",
+    alignItems: "center",
+  },
+  editButton: {
+    backgroundColor: "skyblue",
+    padding: 5,
+    borderRadius: 5,
+    marginBottom: 5,
   },
   deleteButton: {
-    flex: 0.8,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 5,
     backgroundColor: "#FF5B61",
+    padding: 5,
     borderRadius: 5,
   },
-  deleteButtonText: {
+  buttonText: {
     color: "white",
     fontWeight: "bold",
     textAlign: "center",
   },
-  bottomButtons: {
-    marginTop: "auto", 
-    paddingBottom: 20,
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContent: {
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 10,
+    width: "80%",
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 10,
+    marginBottom: 10,
+    borderRadius: 5,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-around",
   },
 });
-
-export default Details;

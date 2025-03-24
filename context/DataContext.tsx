@@ -1,27 +1,28 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const DataContext = createContext({
-  list: [],
-  setList: () => {},
-});
+interface DataContextType {
+  list: { id: string; values: string[] }[];
+  setList: React.Dispatch<React.SetStateAction<{ id: string; values: string[] }[]>>;
+}
 
-export function DataProvider({ children }) {
-  const [list, setList] = useState([]);
-  const [isFirstLoad, setIsFirstLoad] = useState(true); 
+const DataContext = createContext<DataContextType | undefined>(undefined);
 
-  
+export function DataProvider({ children }: { children: ReactNode }) {
+  const [list, setList] = useState<{ id: string; values: string[] }[]>([]);
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
+
   useEffect(() => {
     const loadData = async () => {
       try {
         const storedData = await AsyncStorage.getItem("savedList");
         if (storedData) {
-          setList(JSON.parse(storedData)); 
+          setList(JSON.parse(storedData));
         }
       } catch (error) {
         console.error("Failed to load data:", error);
       } finally {
-        setIsFirstLoad(false);  
+        setIsFirstLoad(false);
       }
     };
     loadData();
@@ -38,15 +39,15 @@ export function DataProvider({ children }) {
       };
       saveData();
     }
-  }, [list, isFirstLoad]);
+  }, [list]);
 
-  return (
-    <DataContext.Provider value={{ list, setList }}>
-      {children}
-    </DataContext.Provider>
-  );
+  return <DataContext.Provider value={{ list, setList }}>{children}</DataContext.Provider>;
 }
 
 export function useData() {
-  return useContext(DataContext);
+  const context = useContext(DataContext);
+  if (!context) {
+    throw new Error("useData must be used within a DataProvider");
+  }
+  return context;
 }
