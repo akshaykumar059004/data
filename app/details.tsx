@@ -51,6 +51,16 @@ export default function Details() {
   };
 
   const saveEdit = async () => {
+    if (editedValues.some((text) => text.trim() === "")) {
+      Alert.alert("Error", "Enter all the data.");
+      return;
+    }
+
+    if (isNaN(editedValues[1]) || isNaN(editedValues[2])) {
+      Alert.alert("Invalid Input", "Age and Income must be numbers.");
+      return;
+    }
+
     const updatedList = list.map((item) =>
       item.id === selectedItem.id ? { ...item, values: editedValues } : item
     );
@@ -153,9 +163,9 @@ export default function Details() {
                   newValues[index] = text;
                   setEditedValues(newValues);
                 }}
+                keyboardType={index === 1 || index === 2 ? "numeric" : "default"}
               />
             ))}
-            <Text></Text>
             <Button title="Save" onPress={saveEdit} />
             <Text></Text>
             <Button title="Cancel" color="red" onPress={() => setModalVisible(false)} />
@@ -200,10 +210,6 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: "center",
   },
-  buttonContainer: {
-    flexDirection: "column",
-    alignItems: "center",
-  },
   editButton: {
     backgroundColor: "skyblue",
     padding: 5,
@@ -215,10 +221,12 @@ const styles = StyleSheet.create({
     padding: 5,
     borderRadius: 5,
   },
-  buttonText: {
-    color: "white",
-    fontWeight: "bold",
-    textAlign: "center",
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 10,
+    marginBottom: 10,
+    borderRadius: 5,
   },
   modalContainer: {
     flex: 1,
@@ -237,16 +245,5 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 10,
     textAlign: "center",
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 10,
-    marginBottom: 10,
-    borderRadius: 5,
-  },
-  modalButtons: {
-    flexDirection: "row",
-    justifyContent: "space-around",
   },
 });
