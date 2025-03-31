@@ -16,7 +16,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     const loadData = async () => {
       try {
         const storedData = await AsyncStorage.getItem("savedList");
-        if (storedData) { 
+        if (storedData) {
           setList(JSON.parse(storedData));
         }
       } catch (error) {

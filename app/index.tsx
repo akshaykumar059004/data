@@ -1,4 +1,4 @@
-import { Text, View, Button, TextInput } from "react-native";
+import { Text, View, Button, TextInput, Alert } from "react-native";
 import { useState } from "react";
 import { useRouter } from "expo-router";
 import { useData } from "../context/DataContext"; 
@@ -20,8 +20,8 @@ export default function Index() {
       income: parseFloat(inputs[2]) || 0,
       address: inputs[3],
     };
-    console.log("Converted Age:", parseInt("10", 10));
-    console.log(payload);
+    //console.log("Converted Age:", parseInt("10", 10));
+   // console.log(payload);
     try {
       //console.log(inputs);
       await axios.post(``, payload,{
@@ -61,6 +61,7 @@ export default function Index() {
           onChangeText={(value) => handleInputChange(value, index)}
           value={inputs[index]}
           placeholder={placeholder}
+          keyboardType={index === 1 || index === 2 ? "numeric" : "default"} 
           style={{
             borderWidth: 2,
             margin: 10,
