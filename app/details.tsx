@@ -13,6 +13,10 @@ import { useFocusEffect } from "expo-router";
 
 export default function Details() {
   const { list, setList } = useData();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [editedValues, setEditedValues] = useState([]);
+
 
   useFocusEffect(
     React.useCallback(() => {
@@ -22,7 +26,7 @@ export default function Details() {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios. get(``);
+      const response = await axios. get(`/api/data`);
       const formattedData = response.data.map((item) => ({
         id: item.id.toString(), // Ensure ID is a string
         values: [item.name, item.age, item.income, item.address], // Convert object to values array
@@ -156,15 +160,15 @@ export default function Details() {
             ))}
             <View style={styles.actionButtons}>
               <TouchableOpacity onPress={() => editItem(item)} style={styles.editButton}>
-                <Text style={styles.editButtonText}>✏️ Edit</Text>
+                <Text>✏️ Edit</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => deleteItem(item.id)} style={styles.deleteButton}>
-                <Text style={styles.deleteButtonText}>🗑️ Delete</Text>
+                <Text>🗑️ Delete</Text>
               </TouchableOpacity>
             </View>
           </View>
         )}
-        ListEmptyComponent={<Text style={styles.noDataText}>No data available</Text>}
+        ListEmptyComponent={<Text>No data available</Text>}
       />
 
       <View style={styles.bottomButtons}>
@@ -241,6 +245,16 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   deleteButton: {
+    backgroundColor: "#FF5B61",
+    padding: 5,
+    borderRadius: 5,
+  },
+  bottomButtons: {
+    backgroundColor: "#FF5B61",
+    padding: 5,
+    borderRadius: 5,
+  },
+  actionButtons: {
     backgroundColor: "#FF5B61",
     padding: 5,
     borderRadius: 5,

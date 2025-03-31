@@ -24,7 +24,7 @@ export default function Index() {
    // console.log(payload);
     try {
       //console.log(inputs);
-      await axios.post(``, payload,{
+      await axios.post(`/api/data`, payload,{
         headers: { "Content-Type": "application/json" }
       });
       //console.log(inputs);
