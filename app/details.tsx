@@ -3,16 +3,40 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, Button, Alert } fro
 import { useData } from "../context/DataContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import XLSX from "xlsx";
+import axios from "axios";
+//import Constants from "expo-constants";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
+import { useFocusEffect } from "expo-router";
+
+//const API_URL = Constants.extra.API_URL; 
 
 export default function Details() {
   const { list, setList } = useData();
 
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchUsers();
+    }, [])
+  );
+
+  const fetchUsers = async () => {
+    try {
+      const response = await axios. get(``);
+      const formattedData = response.data.map((item) => ({
+        id: item.id.toString(), // Ensure ID is a string
+        values: [item.name, item.age, item.income, item.address], // Convert object to values array
+      }));
+      setList(formattedData);
+      console.log(list);
+    } catch (error) {
+      console.log("Error fetching users:", error);
+    }
+  };
+
   const deleteItem = async (id) => {
     const updatedList = list.filter((item) => item.id !== id);
     setList(updatedList);
-
     try {
       await AsyncStorage.setItem("savedList", JSON.stringify(updatedList));
     } catch (error) {
@@ -33,7 +57,7 @@ export default function Details() {
         onPress: async () => {
           setList([]);
           try {
-            await AsyncStorage.removeItem("savedList");
+            await AsyncStorage.removeItem("savedList"); 
           } catch (error) {
             console.error("Failed to clear data:", error);
           }
@@ -97,7 +121,7 @@ export default function Details() {
           <View style={styles.tableRow}>
             {item.values.map((value, index) => (
               <Text key={index} style={styles.cell}>
-                {value}
+                {value} 
               </Text>
             ))}
 
@@ -177,4 +201,3 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Details;
