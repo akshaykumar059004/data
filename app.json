@@ -8,6 +8,12 @@
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "extra": {
+      "API_URL": "https://rn-dev-1.onrender.com",
+      "eas": {
+        "projectId": "6ee43099-e119-4576-9d72-7ba1bc5bc627"
+      }
+    },
     "ios": {
       "supportsTablet": true
     },
@@ -37,14 +43,6 @@
     ],
     "experiments": {
       "typedRoutes": true
-    },
-    "extra": {
-      "router": {
-        "origin": false
-      },
-      "eas": {
-        "projectId": "6ee43099-e119-4576-9d72-7ba1bc5bc627"
-      }
     }
   }
 }

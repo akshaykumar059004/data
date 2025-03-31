@@ -1,28 +1,54 @@
-import { Text, View, Button, TextInput } from "react-native";
+import { Text, View, Button, TextInput, Alert } from "react-native";
 import { useState } from "react";
 import { useRouter } from "expo-router";
 import { useData } from "../context/DataContext"; 
+import axios from "axios";
+//import Constants from "expo-constants";
+
+//const API_URL = Constants.extra.API_URL; 
+
 
 export default function Index() {
   const router = useRouter();
   const { list, setList } = useData();
   const [inputs, setInputs] = useState(["", "", "", ""]);
 
-  function handleInputChange(text, index) {
+  const handleSubmit = async () => {
+    const payload = {
+      name: inputs[0],  // Extract values properly
+      age: parseInt(inputs[1], 10) || 0,  // Ensure it's a number
+      income: parseFloat(inputs[2]) || 0,
+      address: inputs[3],
+    };
+    //console.log("Converted Age:", parseInt("10", 10));
+   // console.log(payload);
+    try {
+      //console.log(inputs);
+      await axios.post(``, payload,{
+        headers: { "Content-Type": "application/json" }
+      });
+      //console.log(inputs);
+      alert("User added!");
+    } catch (error) {
+      console.log("Error adding user:", error);
+    }
+  };
+
+  function handleInputChange(text: string, index: number) {
     const updatedInputs = [...inputs];
     updatedInputs[index] = text;
     setInputs(updatedInputs);
   }
 
-  function addGoalHandler() {
-    if (inputs.some((text) => text.trim() !== "")) {
-      setList((currentList) => [
-        ...currentList,
-        { id: Date.now().toString(), values: [...inputs] },
-      ]);
-      setInputs(["", "", "", ""]);
-    }
-  }
+  // function addGoalHandler() {
+  //   if (inputs.some((text) => text.trim() !== "")) {
+  //     setList((currentList) => [
+  //       ...currentList,
+  //       { id: Date.now().toString(), values: [...inputs] },
+  //     ]);
+  //     setInputs(["", "", "", ""]);
+  //   }
+  // }
 
   return (
     <View style={{ alignItems: "center", height: "100%", padding: 20 }}>
@@ -35,6 +61,7 @@ export default function Index() {
           onChangeText={(value) => handleInputChange(value, index)}
           value={inputs[index]}
           placeholder={placeholder}
+          keyboardType={index === 1 || index === 2 ? "numeric" : "default"} 
           style={{
             borderWidth: 2,
             margin: 10,
@@ -45,7 +72,7 @@ export default function Index() {
         />
       ))}
       <View style={{ margin: 30, width: 200, height: 90 }}>
-        <Button onPress={addGoalHandler} title="Add List" />
+        <Button onPress={handleSubmit} title="Add List" />
         <View style={{ marginVertical: 10 }} />
         <Button onPress={() => router.push("/details")} title="View Data" color="blue" />
       </View>
